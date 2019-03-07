@@ -14,7 +14,8 @@ STEPS TO RUN ON LOCAL
     
 REQUIREMENTS FOR REST API
 
-    1.Create a search application where you expose an endpoint for a client to search based on a certain radius for tree related data.
+    1.Create a search application where you expose an endpoint for a client 
+    to search based on a certain radius for tree related data.
     
     
 INPUT
@@ -25,7 +26,8 @@ INPUT
     
 OUTPUT
    
-    You have to retrieve the count of "common name" (please see in the documentation on the same page above which field to refer to) for all 
+    You have to retrieve the count of "common name" 
+    (please see in the documentation on the same page above which field to refer to) for all 
     the species of trees in that search radius
     - Expected outcome from the api
    ```json
@@ -38,7 +40,9 @@ OUTPUT
         
 SOLUTION STEPS
 
-    If the circle is placed in the Cartesian plane with the defined Cartesian coordinate system (O,x,y) so that the centre S is located at the origin O, and the radius is r, then an analytic equation of the circle can be derived. 
+    If the circle is placed in the Cartesian plane with the defined Cartesian coordinate system (O,x,y) 
+    so that the centre S is located at the origin O, and the radius is r, 
+    then an analytic equation of the circle can be derived. 
     x 2 + y 2 = r 2 .(Pythagorean theorem)    
     
     Given 
