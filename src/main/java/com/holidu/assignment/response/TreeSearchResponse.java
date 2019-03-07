@@ -1,5 +1,6 @@
 package com.holidu.assignment.response;
 
+import com.fasterxml.jackson.annotation.JsonRawValue;
 import lombok.*;
 
 @Getter
@@ -8,8 +9,15 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
 public class TreeSearchResponse {
-    String speciesCount;
+
+    @JsonRawValue
+    String speciesSplit;
+
     Integer totalSpecies;
+
     Integer distinctSpeciesCount;
+
+    String searchResult;
 }

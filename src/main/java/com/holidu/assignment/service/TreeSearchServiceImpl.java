@@ -1,15 +1,17 @@
 package com.holidu.assignment.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.holidu.assignment.TreeSearchApplicationConstant;
 import com.holidu.assignment.dto.TreeData;
+import com.holidu.assignment.request.TreeSearchRequest;
 import com.holidu.assignment.response.TreeSearchResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
 import java.io.File;
 import java.math.BigDecimal;
 import java.net.URL;
@@ -27,45 +29,27 @@ public class TreeSearchServiceImpl implements TreeSearchService {
     ObjectMapper objectMapper;
 
     @Override
-    public ResponseEntity<TreeSearchResponse> findTreeSpecies() {
+    public ResponseEntity<TreeSearchResponse> findTreeSpecies(TreeSearchRequest treeSearchRequest) {
         TreeSearchResponse treeSearchResponse = null;
         try {
-            URL resource = TreeSearchServiceImpl.class.getResource("/nwxe-4ae8.json");
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-            List<TreeData> treeDataList = objectMapper.readValue(
-                    new File(String.valueOf(Paths.get(resource.toURI()).toFile())),
-                    new TypeReference<List<TreeData>>() {
-                    });
-
-            BigDecimal givenCartesianX = BigDecimal.valueOf(1100000);
-            BigDecimal givenCartesianY = BigDecimal.valueOf(210000);
-            BigDecimal givenRadius = BigDecimal.valueOf(23000);
-            BigDecimal feetToMeter = BigDecimal.valueOf(0.3048);
-
-            Map<String, Integer> resultMap = new HashMap<>();
-            treeDataList.forEach(treeData -> {
-                if (Objects.nonNull(treeData)) {
-                    countDistinctSpecies(treeData,
-                            treeData.getXSp(),
-                            treeData.getYSp(),
-                            givenCartesianX,
-                            givenCartesianY,
-                            givenRadius,
-                            feetToMeter,
-                            resultMap);
-                }
+            URL resource = TreeSearchServiceImpl.class.getResource(TreeSearchApplicationConstant.TREE_DATA_SET);
+            List<TreeData> treeDataList = objectMapper.readValue(new File(String.valueOf(Paths.get(resource.toURI()).toFile())), new TypeReference<List<TreeData>>() {
             });
-            Integer noNameTreeCount = resultMap.get(null);
-            resultMap.put("NoNameSpecies", noNameTreeCount);
-            resultMap.remove(null);
-            int totalTrees = resultMap.values().stream().mapToInt(treeCount -> treeCount).sum();
 
-            String speciesCount = objectMapper.writeValueAsString(resultMap);
+            Map<String, Integer> resultMap = scanTreeSpeciesAndPrepareTreeSplit(treeDataList, treeSearchRequest, new HashMap<>());
 
-            treeSearchResponse = TreeSearchResponse.builder()
-                    .speciesCount(speciesCount).distinctSpeciesCount(resultMap.size()).totalSpecies(totalTrees).build();
-            System.out.print(treeSearchResponse.toString());
+            if (resultMap.size() == 0) {
+                treeSearchResponse = buildTreeSearchResponse(null, 0, 0, TreeSearchApplicationConstant.TREE_NOT_FOUND);
+            } else {
+                // Find Trees without name
+                Integer noNameTreeCount = resultMap.get(null);
+                // Give NoName
+                resultMap.put(TreeSearchApplicationConstant.TREE_NO_NAME, noNameTreeCount);
+                // Remove null key from the map
+                resultMap.remove(null);
+                treeSearchResponse = buildTreeSearchResponse(objectMapper.writeValueAsString(resultMap), resultMap.size(), resultMap.values().stream().mapToInt(treeCount -> treeCount).sum(),
+                        TreeSearchApplicationConstant.TREE_SPECIES_RETRIEVED);
+            }
 
             return new ResponseEntity<>(treeSearchResponse, HttpStatus.OK);
         } catch (Exception e) {
@@ -73,44 +57,74 @@ public class TreeSearchServiceImpl implements TreeSearchService {
         }
     }
 
+    private TreeSearchResponse buildTreeSearchResponse(String speciesSplit,
+                                                       Integer distinctSpeciesCount,
+                                                       Integer totalSpecies,
+                                                       String searchResult) {
+        return TreeSearchResponse.builder()
+                .speciesSplit(speciesSplit)
+                .distinctSpeciesCount(distinctSpeciesCount)
+                .totalSpecies(totalSpecies)
+                .searchResult(searchResult).build();
+    }
 
-    private static Map countDistinctSpecies(TreeData treeData,
-                                            String xSp,
-                                            String ySp,
-                                            BigDecimal cartesianX,
-                                            BigDecimal cartesianY,
-                                            BigDecimal givenRadius,
-                                            BigDecimal feetToMeter,
-                                            Map<String, Integer> resultMap) {
+    private Map scanTreeSpeciesAndPrepareTreeSplit(List<TreeData> treeDataList, TreeSearchRequest treeSearchRequest, Map resultMap) {
+        treeDataList.forEach(treeData -> {
+            if (Objects.nonNull(treeData)) {
+                    countDistinctSpecies(treeData,
+                                        treeData.getXSp(),
+                                        treeData.getYSp(),
+                                        treeSearchRequest.getCartesianX(),
+                                        treeSearchRequest.getCartesianY(),
+                                        treeSearchRequest.getSearchRadiusInMeters(),
+                                        new BigDecimal(TreeSearchApplicationConstant.FEET_TO_METER_CONVERSION_FACTOR),
+                                        resultMap);
+                    }
+            });
+        return resultMap;
+    }
 
-        BigDecimal bigDecimalXsp = new BigDecimal(xSp);
-        BigDecimal bigDecimalYsp = new BigDecimal(ySp);
 
-        BigDecimal absX = cartesianX.subtract(bigDecimalXsp).abs();
-        BigDecimal absY = cartesianY.subtract(bigDecimalYsp).abs();
+    private Map countDistinctSpecies(TreeData treeData,
+                                     String xSp,
+                                     String ySp,
+                                     BigDecimal cartesianX,
+                                     BigDecimal cartesianY,
+                                     BigDecimal givenRadiusInMtr,
+                                     BigDecimal feetToMeter,
+                                     Map<String, Integer> resultMap) {
+        BigDecimal absX = cartesianX.subtract(new BigDecimal(xSp)).abs();
+        BigDecimal absY = cartesianY.subtract(new BigDecimal(ySp)).abs();
 
-        BigDecimal powX = absX.pow(2);
-        BigDecimal powY = absY.pow(2);
-        BigDecimal add = powX.add(powY);
+        BigDecimal powX = absX.pow(TreeSearchApplicationConstant.POWER_OF_TWO);
+        BigDecimal powY = absY.pow(TreeSearchApplicationConstant.POWER_OF_TWO);
 
-        double relativeRadiusInFeet = Math.sqrt(add.doubleValue());
+        double relativeRadiusInFeet = Math.sqrt(powX.add(powY).doubleValue());
 
         BigDecimal relativeRadiusInMtr = BigDecimal.valueOf(relativeRadiusInFeet * feetToMeter.doubleValue());
 
-        if (relativeRadiusInMtr.doubleValue() <= givenRadius.doubleValue()) {
+        if (relativeRadiusInMtr.doubleValue() <= givenRadiusInMtr.doubleValue()) {
             if (!resultMap.isEmpty() && resultMap.containsKey(treeData.getSpcCommon())) {
                 Integer integer = resultMap.get(treeData.getSpcCommon());
                 integer++;
                 resultMap.put(treeData.getSpcCommon(), integer);
             } else {
-                // Initialize Count with 1 when an specie found
-                resultMap.put(treeData.getSpcCommon(), 1);
+                resultMap.put(treeData.getSpcCommon(), TreeSearchApplicationConstant.INITIAL_TREE_COUNT);
             }
-        } else {
-            //TODO Some more statistics can be collected for Analytics
         }
-
         return resultMap;
+    }
+
+    public boolean isValidTreeSearchRequest(TreeSearchRequest treeSearchRequest) {
+        boolean isValid = true;
+        if (Objects.isNull(treeSearchRequest) ||
+                treeSearchRequest.getCartesianX() == null ||
+                treeSearchRequest.getCartesianY() == null ||
+                treeSearchRequest.getSearchRadiusInMeters() == null
+        ) {
+            isValid = false;
+        }
+        return isValid;
     }
 
 }

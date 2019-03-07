@@ -143,7 +143,6 @@ public class TreeData {
 
     @JsonProperty("zipcode")
     String zipcode;
-    
 
 
 }
