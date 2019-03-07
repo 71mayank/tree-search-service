@@ -8,7 +8,7 @@ PREREQUISITE TO RUN THE tree-search-service
 
 STEPS TO RUN ON LOCAL
 
-    1. Clone weather service in your system using git clone https://github.com/71mayank/tree-search-service.git
+    1. Clone tree-search-service in your system using git clone https://github.com/71mayank/tree-search-service.git
     2. Navigate to tree-search-service folder open git bash and run command mvn spring-boot:run
     3. Browse url http://localhost:3030/swagger-ui.html
     
