@@ -37,7 +37,7 @@ public class TreeSearchController {
         if(treeSearchServiceImpl.isValidTreeSearchRequest(treeSearchRequest)) {
             return treeSearchServiceImpl.findTreeSpecies(treeSearchRequest);
         }else{
-            return new ResponseEntity<>(TreeSearchResponse.builder().searchResult(TreeSearchApplicationConstant.INVALID_INPUT).build(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(TreeSearchResponse.builder().searchOutcome(TreeSearchApplicationConstant.INVALID_INPUT).build(), HttpStatus.BAD_REQUEST);
         }
     }
 

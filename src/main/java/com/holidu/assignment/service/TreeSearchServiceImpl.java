@@ -64,8 +64,8 @@ public class TreeSearchServiceImpl implements TreeSearchService {
         return TreeSearchResponse.builder()
                 .speciesSplit(speciesSplit)
                 .distinctSpeciesCount(distinctSpeciesCount)
-                .totalSpecies(totalSpecies)
-                .searchResult(searchResult).build();
+                .totalSpeciesCount(totalSpecies)
+                .searchOutcome(searchResult).build();
     }
 
     private Map scanTreeSpeciesAndPrepareTreeSplit(List<TreeData> treeDataList, TreeSearchRequest treeSearchRequest, Map resultMap) {

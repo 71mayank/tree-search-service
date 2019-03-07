@@ -15,9 +15,9 @@ public class TreeSearchResponse {
     @JsonRawValue
     String speciesSplit;
 
-    Integer totalSpecies;
+    Integer totalSpeciesCount;
 
     Integer distinctSpeciesCount;
 
-    String searchResult;
+    String searchOutcome;
 }
