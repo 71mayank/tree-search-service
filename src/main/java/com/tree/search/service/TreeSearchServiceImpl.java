@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import java.io.File;
 import java.math.BigDecimal;
 import java.net.URL;
@@ -35,32 +34,35 @@ public class TreeSearchServiceImpl implements TreeSearchService {
             URL resource = TreeSearchServiceImpl.class.getResource(TreeSearchApplicationConstant.TREE_DATA_SET);
             List<TreeData> treeDataList = objectMapper.readValue(new File(String.valueOf(Paths.get(resource.toURI()).toFile())), new TypeReference<List<TreeData>>() {
             });
-
+            log.info("treeDataList size {} ",treeDataList.size());
             Map<String, Integer> resultMap = scanTreeSpeciesAndPrepareTreeSplit(treeDataList, treeSearchRequest, new HashMap<>());
 
             if (resultMap.size() == 0) {
                 treeSearchResponse = buildTreeSearchResponse(null, 0, 0, TreeSearchApplicationConstant.TREE_NOT_FOUND);
             } else {
+                log.info("resultMap size {} ",resultMap.size());
                 // Find Trees without name
                 Integer noNameTreeCount = resultMap.get(null);
-                // Give NoName
-                resultMap.put(TreeSearchApplicationConstant.TREE_NO_NAME, noNameTreeCount);
-                // Remove null key from the map
-                resultMap.remove(null);
+                if(Objects.nonNull(noNameTreeCount)) {
+                    // Give NoName
+                    resultMap.put(TreeSearchApplicationConstant.TREE_NO_NAME, noNameTreeCount);
+                    // Remove null key from the map
+                    resultMap.remove(null);
+                }
                 treeSearchResponse = buildTreeSearchResponse(objectMapper.writeValueAsString(resultMap), resultMap.size(), resultMap.values().stream().mapToInt(treeCount -> treeCount).sum(),
                         TreeSearchApplicationConstant.TREE_SPECIES_RETRIEVED);
             }
-
             return new ResponseEntity<>(treeSearchResponse, HttpStatus.OK);
         } catch (Exception e) {
+            log.error("Exception Encountered {} ",e.getMessage());
             return new ResponseEntity<>(treeSearchResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     public TreeSearchResponse buildTreeSearchResponse(String speciesSplit,
-                                                       Integer distinctSpeciesCount,
-                                                       Integer totalSpecies,
-                                                       String searchResult) {
+                                                      Integer distinctSpeciesCount,
+                                                      Integer totalSpecies,
+                                                      String searchResult) {
         return TreeSearchResponse.builder()
                 .speciesSplit(speciesSplit)
                 .distinctSpeciesCount(distinctSpeciesCount)
@@ -71,29 +73,30 @@ public class TreeSearchServiceImpl implements TreeSearchService {
     public Map scanTreeSpeciesAndPrepareTreeSplit(List<TreeData> treeDataList, TreeSearchRequest treeSearchRequest, Map resultMap) {
         treeDataList.forEach(treeData -> {
             if (Objects.nonNull(treeData)) {
-                    countDistinctSpecies(treeData,
-                                        treeData.getXSp(),
-                                        treeData.getYSp(),
-                                        treeSearchRequest.getCartesianX(),
-                                        treeSearchRequest.getCartesianY(),
-                                        treeSearchRequest.getSearchRadiusInMeters(),
-                                        new BigDecimal(TreeSearchApplicationConstant.FEET_TO_METER_CONVERSION_FACTOR),
-                                        resultMap);
-                    }
-            });
+                countDistinctSpecies(treeData,
+                        treeData.getXSp(),
+                        treeData.getYSp(),
+                        treeSearchRequest.getCartesianX(),
+                        treeSearchRequest.getCartesianY(),
+                        treeSearchRequest.getSearchRadiusInMeters(),
+                        new BigDecimal(TreeSearchApplicationConstant.FEET_TO_METER_CONVERSION_FACTOR),
+                        resultMap);
+            }
+        });
+        log.info("scanTreeSpeciesAndPrepareTreeSplit success {} ",resultMap.size());
         return resultMap;
     }
 
 
     public Map countDistinctSpecies(TreeData treeData,
-                                     String xSp,
-                                     String ySp,
-                                     BigDecimal cartesianX,
-                                     BigDecimal cartesianY,
-                                     BigDecimal givenRadiusInMtr,
-                                     BigDecimal feetToMeter,
-                                     Map<String, Integer> resultMap) throws NumberFormatException{
-        if(invalidTreeData(treeData,xSp,ySp,cartesianX,cartesianY,givenRadiusInMtr,feetToMeter,resultMap)){
+                                    String xSp,
+                                    String ySp,
+                                    BigDecimal cartesianX,
+                                    BigDecimal cartesianY,
+                                    BigDecimal givenRadiusInMtr,
+                                    BigDecimal feetToMeter,
+                                    Map<String, Integer> resultMap) throws NumberFormatException {
+        if (invalidTreeData(treeData, xSp, ySp, cartesianX, cartesianY, givenRadiusInMtr, feetToMeter, resultMap)) {
             return null;
         }
 
@@ -140,12 +143,12 @@ public class TreeSearchServiceImpl implements TreeSearchService {
     public boolean isValidTreeSearchRequest(TreeSearchRequest treeSearchRequest) {
         boolean isValid = true;
         if (Objects.isNull(treeSearchRequest) ||
-                treeSearchRequest.getCartesianX() == null ||
-                treeSearchRequest.getCartesianY() == null ||
-                treeSearchRequest.getSearchRadiusInMeters() == null
-        ) {
+            Objects.isNull(treeSearchRequest.getCartesianX()) ||
+            Objects.isNull(treeSearchRequest.getCartesianY()) ||
+            Objects.isNull(treeSearchRequest.getSearchRadiusInMeters())){
             isValid = false;
         }
+        log.info("isValidTreeSearchRequest {} ",isValid);
         return isValid;
     }
 

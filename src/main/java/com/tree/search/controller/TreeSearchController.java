@@ -32,7 +32,7 @@ public class TreeSearchController {
             @ApiResponse(code = 403, message = "Access to the search tree you were trying is forbidden"),
             @ApiResponse(code = 404, message = "The tree search you were trying to reach is not found")
     })
-    @PostMapping(value = "/findTreeSpecies", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/findTreeSpecies")
     public ResponseEntity<TreeSearchResponse> findTreeSpecies(@RequestBody TreeSearchRequest treeSearchRequest) {
         if(treeSearchServiceImpl.isValidTreeSearchRequest(treeSearchRequest)) {
             return treeSearchServiceImpl.findTreeSpecies(treeSearchRequest);
