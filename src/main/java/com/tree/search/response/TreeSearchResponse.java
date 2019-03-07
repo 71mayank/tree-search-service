@@ -1,4 +1,4 @@
-package com.holidu.assignment.response;
+package com.tree.search.response;
 
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import lombok.*;

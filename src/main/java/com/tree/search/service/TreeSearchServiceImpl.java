@@ -1,11 +1,11 @@
-package com.holidu.assignment.service;
+package com.tree.search.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.holidu.assignment.TreeSearchApplicationConstant;
-import com.holidu.assignment.dto.TreeData;
-import com.holidu.assignment.request.TreeSearchRequest;
-import com.holidu.assignment.response.TreeSearchResponse;
+import com.tree.search.constant.TreeSearchApplicationConstant;
+import com.tree.search.dto.TreeData;
+import com.tree.search.request.TreeSearchRequest;
+import com.tree.search.response.TreeSearchResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -57,7 +57,7 @@ public class TreeSearchServiceImpl implements TreeSearchService {
         }
     }
 
-    private TreeSearchResponse buildTreeSearchResponse(String speciesSplit,
+    public TreeSearchResponse buildTreeSearchResponse(String speciesSplit,
                                                        Integer distinctSpeciesCount,
                                                        Integer totalSpecies,
                                                        String searchResult) {
@@ -68,7 +68,7 @@ public class TreeSearchServiceImpl implements TreeSearchService {
                 .searchOutcome(searchResult).build();
     }
 
-    private Map scanTreeSpeciesAndPrepareTreeSplit(List<TreeData> treeDataList, TreeSearchRequest treeSearchRequest, Map resultMap) {
+    public Map scanTreeSpeciesAndPrepareTreeSplit(List<TreeData> treeDataList, TreeSearchRequest treeSearchRequest, Map resultMap) {
         treeDataList.forEach(treeData -> {
             if (Objects.nonNull(treeData)) {
                     countDistinctSpecies(treeData,
@@ -85,14 +85,18 @@ public class TreeSearchServiceImpl implements TreeSearchService {
     }
 
 
-    private Map countDistinctSpecies(TreeData treeData,
+    public Map countDistinctSpecies(TreeData treeData,
                                      String xSp,
                                      String ySp,
                                      BigDecimal cartesianX,
                                      BigDecimal cartesianY,
                                      BigDecimal givenRadiusInMtr,
                                      BigDecimal feetToMeter,
-                                     Map<String, Integer> resultMap) {
+                                     Map<String, Integer> resultMap) throws NumberFormatException{
+        if(invalidTreeData(treeData,xSp,ySp,cartesianX,cartesianY,givenRadiusInMtr,feetToMeter,resultMap)){
+            return null;
+        }
+
         BigDecimal absX = cartesianX.subtract(new BigDecimal(xSp)).abs();
         BigDecimal absY = cartesianY.subtract(new BigDecimal(ySp)).abs();
 
@@ -113,6 +117,24 @@ public class TreeSearchServiceImpl implements TreeSearchService {
             }
         }
         return resultMap;
+    }
+
+    private boolean invalidTreeData(TreeData treeData,
+                                    String xSp,
+                                    String ySp,
+                                    BigDecimal cartesianX,
+                                    BigDecimal cartesianY,
+                                    BigDecimal givenRadiusInMtr,
+                                    BigDecimal feetToMeter,
+                                    Map<String, Integer> resultMap) {
+        return Objects.isNull(treeData)
+                || Objects.isNull(xSp)
+                || Objects.isNull(ySp)
+                || Objects.isNull(cartesianX)
+                || Objects.isNull(cartesianY)
+                || Objects.isNull(givenRadiusInMtr)
+                || Objects.isNull(feetToMeter)
+                || Objects.isNull(resultMap);
     }
 
     public boolean isValidTreeSearchRequest(TreeSearchRequest treeSearchRequest) {

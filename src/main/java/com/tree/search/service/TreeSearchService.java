@@ -1,7 +1,7 @@
-package com.holidu.assignment.service;
+package com.tree.search.service;
 
-import com.holidu.assignment.request.TreeSearchRequest;
-import com.holidu.assignment.response.TreeSearchResponse;
+import com.tree.search.request.TreeSearchRequest;
+import com.tree.search.response.TreeSearchResponse;
 import org.springframework.http.ResponseEntity;
 
 public interface TreeSearchService {

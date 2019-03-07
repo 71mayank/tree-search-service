@@ -1,4 +1,4 @@
-package com.holidu.assignment.exception;
+package com.tree.search.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

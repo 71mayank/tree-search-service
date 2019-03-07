@@ -1,4 +1,4 @@
-package com.holidu.assignment.config;
+package com.tree.search.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

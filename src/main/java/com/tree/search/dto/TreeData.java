@@ -1,4 +1,4 @@
-package com.holidu.assignment.dto;
+package com.tree.search.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;

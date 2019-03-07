@@ -1,9 +1,9 @@
-package com.holidu.assignment.controller;
+package com.tree.search.controller;
 
-import com.holidu.assignment.TreeSearchApplicationConstant;
-import com.holidu.assignment.request.TreeSearchRequest;
-import com.holidu.assignment.response.TreeSearchResponse;
-import com.holidu.assignment.service.TreeSearchServiceImpl;
+import com.tree.search.constant.TreeSearchApplicationConstant;
+import com.tree.search.request.TreeSearchRequest;
+import com.tree.search.response.TreeSearchResponse;
+import com.tree.search.service.TreeSearchServiceImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;

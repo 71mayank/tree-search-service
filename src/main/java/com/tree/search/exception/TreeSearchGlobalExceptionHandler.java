@@ -1,4 +1,4 @@
-package com.holidu.assignment.exception;
+package com.tree.search.exception;
 
 
 import java.util.Date;

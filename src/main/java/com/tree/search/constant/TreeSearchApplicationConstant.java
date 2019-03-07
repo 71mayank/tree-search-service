@@ -1,4 +1,4 @@
-package com.holidu.assignment;
+package com.tree.search.constant;
 
 public class TreeSearchApplicationConstant {
 

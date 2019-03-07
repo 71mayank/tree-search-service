@@ -1,11 +1,14 @@
-package com.holidu.assignment.request;
+package com.tree.search.request;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+
 import java.math.BigDecimal;
 
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class TreeSearchRequest {
     BigDecimal cartesianX;
     BigDecimal cartesianY;

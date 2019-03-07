@@ -1,4 +1,4 @@
-package com.holidu.assignment.config;
+package com.tree.search.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,7 +15,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 public class TreeSearchSwaggerConfig {
 
-    private static final String TREE_SEARCH_API_BASE_PACKAGE = "com.holidu.assignment.controller";
+    private static final String TREE_SEARCH_API_BASE_PACKAGE = "com.tree.search.controller";
 
     private static final String TREE_SEARCH_API_TITLE = "Tree Search Service API";
     private static final String TREE_SEARCH_API_DESCRIPTION = "Tree Search REST API";
